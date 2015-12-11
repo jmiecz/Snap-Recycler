@@ -13,7 +13,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         SnapRecyclerView swipeRecycler = (SnapRecyclerView)findViewById(R.id.swipeRecylcer);
-        swipeRecycler.setVisibleItemCount(2);
+        swipeRecycler.setVisibleItemCount(5, 30, 0, 20, 0);
 
         swipeRecycler.setAdapter(new SwipeAdapter());
 

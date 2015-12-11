@@ -5,12 +5,17 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 
 /**
  * Created by josh.mieczkowski on 12/7/2015.
  */
 class AutoSizeManger extends LinearLayoutManager {
     private int visiableItemCount = 1;
+    int paddingLeft;
+    int paddingBottom;
+    int paddingRight;
+    int paddingTop;
 
     public AutoSizeManger(Context context) {
         super(context);
@@ -28,16 +33,27 @@ class AutoSizeManger extends LinearLayoutManager {
         this.visiableItemCount = visibleItemCount;
     }
 
+    public void setPadding(int paddingLeft, int paddingTop, int paddingRight, int paddingBottom){
+        this.paddingLeft = paddingLeft;
+        this.paddingTop = paddingTop;
+        this.paddingRight = paddingRight;
+        this.paddingBottom = paddingBottom;
+    }
+
     @Override
     public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
         super.onLayoutChildren(recycler, state);
-        int childWidth = getWidth() / visiableItemCount;
-        try {
-            for(int index = 0; index < state.getItemCount(); index++){
-                getChildAt(index).getLayoutParams().width = childWidth;
+        int widthWithoutPadding = getWidth() - (visiableItemCount * paddingLeft + visiableItemCount * paddingRight);
+        int childWidth = widthWithoutPadding / visiableItemCount;
+        for(int index = 0; index < state.getItemCount(); index++){
+            View child = getChildAt(index);
+
+            if(child != null) {
+                child.getLayoutParams().width = childWidth;
+
+                ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams)child.getLayoutParams();
+                marginLayoutParams.setMargins(paddingLeft, paddingTop, paddingRight, paddingBottom);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 }

@@ -1,10 +1,13 @@
 package com.snaprecycler;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.support.annotation.DimenRes;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -42,7 +45,7 @@ public class SnapRecyclerView extends RecyclerView {
     }
 
     private void setupView(){
-        setHasFixedSize(true);
+        setHasFixedSize(false);
         setScrollListener();
     }
 
@@ -74,15 +77,19 @@ public class SnapRecyclerView extends RecyclerView {
     }
 
     public void setVisibleItemCount(int visibleItemCount){
-        AutoSizeManger autoSizeManger = new AutoSizeManger(getContext(), LinearLayoutManager.HORIZONTAL, false);
-        autoSizeManger.setVisibleItemCount(visibleItemCount);
-        autoSizeManger.setSmoothScrollbarEnabled(true);
-        setLayoutManager(autoSizeManger);
+        setVisibleItemCount(visibleItemCount, 0);
     }
 
-    @Override
-    public void setAdapter(Adapter adapter) {
-        super.setAdapter(adapter);
+    public void setVisibleItemCount(int visibleItemCount, int padding){
+        setVisibleItemCount(visibleItemCount, padding, padding, padding, padding);
+    }
+
+    public void setVisibleItemCount(int visibleItemCount, int paddingLeft, int paddingTop, int paddingRight, int paddingBottom){
+        AutoSizeManger autoSizeManger = new AutoSizeManger(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        autoSizeManger.setVisibleItemCount(visibleItemCount);
+        autoSizeManger.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
+        //autoSizeManger.setSmoothScrollbarEnabled(true);
+        setLayoutManager(autoSizeManger);
     }
 
     @Override
@@ -102,8 +109,8 @@ public class SnapRecyclerView extends RecyclerView {
             View child = getChildAt(0);
             childWidth = child.getMeasuredWidth();
 
-            int paddingLeft = child.getPaddingLeft() * 2;
-            int paddingRight = child.getPaddingRight() * 2;
+            int paddingLeft = child.getPaddingLeft();
+            int paddingRight = child.getPaddingRight();
             padding = paddingLeft + paddingRight;
         }
     }
