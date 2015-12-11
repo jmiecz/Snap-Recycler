@@ -8,6 +8,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -27,7 +28,6 @@ public class SnapRecyclerView extends RecyclerView {
     private long lastScrollTime = 0;
 
     private int childWidth = 0;
-    private int padding = 0;
 
     public SnapRecyclerView(Context context) {
         super(context);
@@ -92,6 +92,7 @@ public class SnapRecyclerView extends RecyclerView {
         setLayoutManager(autoSizeManger);
     }
 
+
     @Override
     public void draw(Canvas c) {
         super.draw(c);
@@ -99,19 +100,18 @@ public class SnapRecyclerView extends RecyclerView {
     }
 
     private void setPadding(){
-        if(padding != 0){
+        if(childWidth != 0){
             return;
         }
-
-        if(getChildCount() <= 1){
-            padding = 0;
-        }else{
+        if(getChildCount() > 1){
             View child = getChildAt(0);
             childWidth = child.getMeasuredWidth();
 
-            int paddingLeft = child.getPaddingLeft();
-            int paddingRight = child.getPaddingRight();
-            padding = paddingLeft + paddingRight;
+            LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
+            childWidth += layoutParams.getMarginStart();
+            childWidth += layoutParams.getMarginEnd();
+
+            scrollToView(getFirstView());
         }
     }
 
@@ -156,8 +156,6 @@ public class SnapRecyclerView extends RecyclerView {
         if (child == null)
             return;
 
-        stopScroll();
-
         int scrollDistance = getScrollDistance(child);
 
         if (scrollDistance != 0)
@@ -166,9 +164,9 @@ public class SnapRecyclerView extends RecyclerView {
 
     private int getScrollDistance(View child) {
         int childX = (int) child.getX();
-        int currentX = (int) getX();
+        LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
 
-        return childX + padding - currentX;
+        return childX - layoutParams.getMarginStart();
     }
 
     private View getFirstView() {
