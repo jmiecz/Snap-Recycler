@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 /**
  * Created by josh.mieczkowski on 12/4/2015.
@@ -11,9 +12,11 @@ import android.view.ViewGroup;
 public class SwipeAdapter extends RecyclerView.Adapter<SwipeAdapter.SwipeView>{
 
     class SwipeView extends RecyclerView.ViewHolder{
+        TextView txtTest;
 
         public SwipeView(View itemView) {
             super(itemView);
+            txtTest = (TextView)itemView.findViewById(R.id.txtTest);
         }
     }
 
@@ -26,7 +29,7 @@ public class SwipeAdapter extends RecyclerView.Adapter<SwipeAdapter.SwipeView>{
 
     @Override
     public void onBindViewHolder(SwipeView swipeView, int i) {
-
+        swipeView.txtTest.setText("TEST " + i);
     }
 
     @Override
