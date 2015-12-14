@@ -14,9 +14,9 @@ import android.view.View;
  * Created by josh.mieczkowski on 12/7/2015.
  */
 public class SnapRecyclerView extends RecyclerView {
-    private int childWidth = 0;
     private boolean swipeRightToLeft = true;
     private GestureDetectorCompat detectorCompat;
+    private boolean firstLoad = true;
 
     public SnapRecyclerView(Context context) {
         super(context);
@@ -69,25 +69,16 @@ public class SnapRecyclerView extends RecyclerView {
         setLayoutManager(autoSizeManger);
     }
 
-
     @Override
-    public void draw(Canvas c) {
-        super.draw(c);
+    public void onDraw(Canvas c) {
         setPadding();
+        super.onDraw(c);
+
     }
 
     private void setPadding(){
-        if(childWidth != 0){
-            return;
-        }
-        if(getChildCount() > 1){
-            View child = getChildAt(0);
-            childWidth = child.getMeasuredWidth();
-
-            LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
-            childWidth += layoutParams.getMarginStart();
-            childWidth += layoutParams.getMarginEnd();
-
+        if(firstLoad){
+            firstLoad = false;
             scrollToView(getFirstView());
         }
     }
@@ -135,17 +126,16 @@ public class SnapRecyclerView extends RecyclerView {
             return null;
 
         View child = getChildAt(0);
-        int childStart = (int) child.getX();
-        int childMiddle = childStart + (childWidth / 2);
+        ChildSizes childSize = new ChildSizes(child);
 
         if(swipeRightToLeft) {
-            if (childStart < 0 && childMiddle < 0) {
+            if (childSize.getStart() < 0 && childSize.getMiddle() < 0) {
                 return getChildAt(1);
             } else {
                 return child;
             }
         }else{
-            if(childMiddle < 0){
+            if(childSize.getMiddle() < 0){
                 return getChildAt(1);
             }else{
                 return child;
