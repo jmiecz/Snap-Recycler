@@ -1,21 +1,14 @@
 package com.snaprecycler;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Canvas;
-import android.support.annotation.DimenRes;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
-
-import static android.widget.AbsListView.OnScrollListener.SCROLL_STATE_FLING;
-import static android.widget.AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL;
 
 /**
  * Created by josh.mieczkowski on 12/7/2015.
@@ -73,7 +66,6 @@ public class SnapRecyclerView extends RecyclerView {
         AutoSizeManger autoSizeManger = new AutoSizeManger(getContext(), LinearLayoutManager.HORIZONTAL, false);
         autoSizeManger.setVisibleItemCount(visibleItemCount);
         autoSizeManger.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
-        //autoSizeManger.setSmoothScrollbarEnabled(true);
         setLayoutManager(autoSizeManger);
     }
 
@@ -102,8 +94,7 @@ public class SnapRecyclerView extends RecyclerView {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
-        handleDirection(event);
-        View targetView = getChildClosestToX((int) event.getX());
+        View targetView = getFirstView();
 
         if (event.getAction() == MotionEvent.ACTION_UP) {
             if (targetView != getFirstView()) {
@@ -121,29 +112,6 @@ public class SnapRecyclerView extends RecyclerView {
         return super.onTouchEvent(e);
     }
 
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent e) {
-        View targetView = getChildClosestToX((int) e.getX());
-
-        if (targetView != getFirstView()) {
-            return true;
-        }
-
-        return super.onInterceptTouchEvent(e);
-    }
-
-    float downXValue;
-    private void handleDirection(MotionEvent event){
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                downXValue = event.getX();
-                break;
-            case MotionEvent.ACTION_UP:
-                float currentX = event.getX();
-                swipeRightToLeft = downXValue > currentX;
-        }
-
-    }
 
     private void scrollToView(View child) {
         if (child == null)
@@ -163,80 +131,40 @@ public class SnapRecyclerView extends RecyclerView {
     }
 
     private View getFirstView() {
-        return getChildClosestToX(childWidth);
-    }
-
-    private View getChildClosestToX(int x) {
         if (getChildCount() <= 0)
             return null;
 
-        for (int index = 0; index < getChildCount(); index++) {
-            View child = getChildAt(index);
+        View child = getChildAt(0);
+        int childStart = (int) child.getX();
+        int childMiddle = childStart + (childWidth / 2);
 
-            int childStart = (int) child.getX();
-            int childMiddle = childStart + (childWidth / 2);
-            int childEnd = childStart + childWidth;
-
-
-            if(x >= childStart && x < childMiddle){
-                return getChildAt(index - 1);
-            }else if(x >= childMiddle && x < childEnd){
+        if(swipeRightToLeft) {
+            if (childStart < 0 && childMiddle < 0) {
+                return getChildAt(1);
+            } else {
+                return child;
+            }
+        }else{
+            if(childMiddle < 0){
+                return getChildAt(1);
+            }else{
                 return child;
             }
         }
-
-        return null;
     }
 
     class SwipeListener extends GestureDetector.SimpleOnGestureListener {
-        /**
-         * Swipe min distance.
-         */
-        private static final int SWIPE_MIN_DISTANCE = 10;
-        /**
-         * Swipe max off path.
-         */
-        private static final int SWIPE_MAX_OFF_PATH = 250;
-        /**
-         * Swipe threshold velocity.
-         */
-        private static final int SWIPE_THRESHOLD_VELOCITY = 100;
-
-        @Override
-        public boolean onDown(MotionEvent e) {
-            return false;
-        }
-
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            return false;
-        }
-
-        @Override
-        public void onLongPress(MotionEvent e) {
-        }
-
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             if(e1.getX() > e2.getX()){
-                Log.wtf("TEST", "right to left");
                 swipeRightToLeft = true;
             }else{
-                Log.wtf("TEST", "left to right");
                 swipeRightToLeft = false;
             }
 
             return false;
         }
 
-        @Override
-        public void onShowPress(MotionEvent e) {
-        }
-
-        @Override
-        public boolean onSingleTapUp(MotionEvent e) {
-            return false;
-        }
     }
 
 }
