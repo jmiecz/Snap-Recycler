@@ -11,11 +11,7 @@ import android.view.ViewGroup;
  * Created by josh.mieczkowski on 12/7/2015.
  */
 class AutoSizeManger extends LinearLayoutManager {
-    private int visiableItemCount = 1;
-    int paddingLeft;
-    int paddingBottom;
-    int paddingRight;
-    int paddingTop;
+    private ColumnHandler columnHandler;
 
     public AutoSizeManger(Context context) {
         super(context);
@@ -29,22 +25,21 @@ class AutoSizeManger extends LinearLayoutManager {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
-    public void setVisibleItemCount(int visibleItemCount){
-        this.visiableItemCount = visibleItemCount;
-    }
-
-    public void setPadding(int paddingLeft, int paddingTop, int paddingRight, int paddingBottom){
-        this.paddingLeft = paddingLeft;
-        this.paddingTop = paddingTop;
-        this.paddingRight = paddingRight;
-        this.paddingBottom = paddingBottom;
+    public void setColumnHandler(ColumnHandler columnHandler) {
+        this.columnHandler = columnHandler;
     }
 
     @Override
     public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
         super.onLayoutChildren(recycler, state);
-        int widthWithoutPadding = getWidth() - (visiableItemCount * paddingLeft + visiableItemCount * paddingRight);
-        int childWidth = widthWithoutPadding / visiableItemCount;
+        int widthWithoutPadding = getWidth() - (columnHandler.getVisibleItemCount() * columnHandler.getPaddingLeft()
+                + columnHandler.getVisibleItemCount() * columnHandler.getPaddingRight());
+        int childWidth = widthWithoutPadding / columnHandler.getVisibleItemCount();
+        if(columnHandler.getPercentToShowOfOffViews() > 0f){
+            int offView = (int)(childWidth * columnHandler.getPercentToShowOfOffViews()) / columnHandler.getVisibleItemCount();
+            childWidth -= offView;
+        }
+
         for(int index = 0; index < state.getItemCount(); index++){
             View child = getChildAt(index);
 
@@ -52,7 +47,7 @@ class AutoSizeManger extends LinearLayoutManager {
                 child.getLayoutParams().width = childWidth;
 
                 ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams)child.getLayoutParams();
-                marginLayoutParams.setMargins(paddingLeft, paddingTop, paddingRight, paddingBottom);
+                marginLayoutParams.setMargins(columnHandler.getPaddingLeft(), columnHandler.getPaddingTop(), columnHandler.getPaddingRight(), columnHandler.getPaddingBottom());
             }
         }
     }

@@ -17,6 +17,7 @@ public class SnapRecyclerView extends RecyclerView {
     private boolean swipeRightToLeft = true;
     private GestureDetectorCompat detectorCompat;
     private boolean firstLoad = true;
+    private boolean hasAdapterSet = false;
 
     public SnapRecyclerView(Context context) {
         super(context);
@@ -31,6 +32,15 @@ public class SnapRecyclerView extends RecyclerView {
     public SnapRecyclerView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         setupView();
+    }
+
+    @Override
+    public void setAdapter(Adapter adapter) {
+        if(!hasAdapterSet){
+            throw new RuntimeException("setColumnHandler was not called");
+        }
+
+        super.setAdapter(adapter);
     }
 
     private void setupView(){
@@ -54,19 +64,12 @@ public class SnapRecyclerView extends RecyclerView {
         addOnScrollListener(scrollListener);
     }
 
-    public void setVisibleItemCount(int visibleItemCount){
-        setVisibleItemCount(visibleItemCount, 0);
-    }
-
-    public void setVisibleItemCount(int visibleItemCount, int padding){
-        setVisibleItemCount(visibleItemCount, padding, padding, padding, padding);
-    }
-
-    public void setVisibleItemCount(int visibleItemCount, int paddingLeft, int paddingTop, int paddingRight, int paddingBottom){
+    public void setColumnHandler(ColumnHandler columnHandler){
         AutoSizeManger autoSizeManger = new AutoSizeManger(getContext(), LinearLayoutManager.HORIZONTAL, false);
-        autoSizeManger.setVisibleItemCount(visibleItemCount);
-        autoSizeManger.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
+        autoSizeManger.setColumnHandler(columnHandler);
         setLayoutManager(autoSizeManger);
+
+        hasAdapterSet = true;
     }
 
     @Override
@@ -129,6 +132,11 @@ public class SnapRecyclerView extends RecyclerView {
         ChildSizes childSize = new ChildSizes(child);
 
         if(swipeRightToLeft) {
+            View lastChild = getChildAt(getChildCount() - 1);
+            if(getChildAdapterPosition(lastChild) == getAdapter().getItemCount() - 1){
+                return getChildAt(1);
+            }
+
             if (childSize.getStart() < 0 && childSize.getMiddle() < 0) {
                 return getChildAt(1);
             } else {
