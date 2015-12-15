@@ -9,14 +9,14 @@ import android.widget.TextView;
 /**
  * Created by josh.mieczkowski on 12/4/2015.
  */
-public class SwipeAdapter extends RecyclerView.Adapter<SwipeAdapter.SwipeView>{
+public class SwipeAdapter extends RecyclerView.Adapter<SwipeAdapter.SwipeView> {
 
-    class SwipeView extends RecyclerView.ViewHolder{
+    class SwipeView extends RecyclerView.ViewHolder {
         TextView txtTest;
 
         public SwipeView(View itemView) {
             super(itemView);
-            txtTest = (TextView)itemView.findViewById(R.id.txtTest);
+            txtTest = (TextView) itemView.findViewById(R.id.txtTest);
         }
     }
 

@@ -9,15 +9,17 @@ import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 
 /**
  * Created by josh.mieczkowski on 12/7/2015.
  */
 public class SnapRecyclerView extends RecyclerView {
     private boolean swipeRightToLeft = true;
+    private boolean swipeBottomToTop = true;
     private GestureDetectorCompat detectorCompat;
     private boolean firstLoad = true;
-    private boolean hasAdapterSet = false;
+    private int orientation;
 
     public SnapRecyclerView(Context context) {
         super(context);
@@ -35,21 +37,23 @@ public class SnapRecyclerView extends RecyclerView {
     }
 
     @Override
-    public void setAdapter(Adapter adapter) {
-        if(!hasAdapterSet){
-            throw new RuntimeException("setColumnHandler was not called");
+    public void setLayoutManager(LayoutManager layout) {
+        if (!(layout instanceof LinearLayoutManager)) {
+            throw new RuntimeException("LayoutManger must be an instance of LinearLayoutManager");
+        } else {
+            orientation = ((LinearLayoutManager) layout).getOrientation();
         }
 
-        super.setAdapter(adapter);
+        super.setLayoutManager(layout);
     }
 
-    private void setupView(){
+    private void setupView() {
         setHasFixedSize(false);
         setScrollListener();
         detectorCompat = new GestureDetectorCompat(getContext(), new SwipeListener());
     }
 
-    private void setScrollListener(){
+    private void setScrollListener() {
         OnScrollListener scrollListener = new OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -64,23 +68,22 @@ public class SnapRecyclerView extends RecyclerView {
         addOnScrollListener(scrollListener);
     }
 
-    public void setColumnHandler(ColumnHandler columnHandler){
-        AutoSizeManger autoSizeManger = new AutoSizeManger(getContext(), LinearLayoutManager.HORIZONTAL, false);
-        autoSizeManger.setColumnHandler(columnHandler);
-        setLayoutManager(autoSizeManger);
+    public void setAutoSizeColumns(AutoSizeColumns autoSizeColumns) {
+        orientation = autoSizeColumns.getOrientation();
 
-        hasAdapterSet = true;
+        AutoSizeManger autoSizeManger = new AutoSizeManger(getContext(), orientation, false);
+        autoSizeManger.setAutoSizeColumns(autoSizeColumns);
+        setLayoutManager(autoSizeManger);
     }
 
     @Override
     public void onDraw(Canvas c) {
         setPadding();
         super.onDraw(c);
-
     }
 
-    private void setPadding(){
-        if(firstLoad){
+    private void setPadding() {
+        if (firstLoad) {
             firstLoad = false;
             scrollToView(getFirstView());
         }
@@ -113,15 +116,26 @@ public class SnapRecyclerView extends RecyclerView {
 
         int scrollDistance = getScrollDistance(child);
 
-        if (scrollDistance != 0)
-            smoothScrollBy(scrollDistance, 0);
+        if (scrollDistance != 0) {
+            if (orientation == AutoSizeColumns.VERTICAL) {
+                smoothScrollBy(0, scrollDistance);
+            } else {
+                smoothScrollBy(scrollDistance, 0);
+            }
+        }
     }
 
     private int getScrollDistance(View child) {
-        int childX = (int) child.getX();
-        LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
+        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) child.getLayoutParams();
+        if (orientation == AutoSizeColumns.VERTICAL) {
+            int childY = (int) child.getY();
+            return childY - layoutParams.topMargin;
+        } else {
+            int childX = (int) child.getX();
+            return childX - layoutParams.getMarginStart();
+        }
 
-        return childX - layoutParams.getMarginStart();
+
     }
 
     private View getFirstView() {
@@ -129,11 +143,12 @@ public class SnapRecyclerView extends RecyclerView {
             return null;
 
         View child = getChildAt(0);
-        ChildSizes childSize = new ChildSizes(child);
+        ChildSizes childSize = new ChildSizes(child, orientation);
+        boolean swipe = (orientation == AutoSizeColumns.VERTICAL ? swipeBottomToTop : swipeRightToLeft);
 
-        if(swipeRightToLeft) {
+        if (swipe) {
             View lastChild = getChildAt(getChildCount() - 1);
-            if(getChildAdapterPosition(lastChild) == getAdapter().getItemCount() - 1){
+            if (getChildAdapterPosition(lastChild) == getAdapter().getItemCount() - 1) {
                 return getChildAt(1);
             }
 
@@ -142,10 +157,10 @@ public class SnapRecyclerView extends RecyclerView {
             } else {
                 return child;
             }
-        }else{
-            if(childSize.getMiddle() < 0){
+        } else {
+            if (childSize.getMiddle() < 0) {
                 return getChildAt(1);
-            }else{
+            } else {
                 return child;
             }
         }
@@ -154,10 +169,18 @@ public class SnapRecyclerView extends RecyclerView {
     class SwipeListener extends GestureDetector.SimpleOnGestureListener {
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            if(e1.getX() > e2.getX()){
-                swipeRightToLeft = true;
-            }else{
-                swipeRightToLeft = false;
+            if (orientation == AutoSizeColumns.VERTICAL) {
+                if (e1.getY() > e2.getY()) {
+                    swipeBottomToTop = true;
+                } else {
+                    swipeBottomToTop = false;
+                }
+            } else {
+                if (e1.getX() > e2.getX()) {
+                    swipeRightToLeft = true;
+                } else {
+                    swipeRightToLeft = false;
+                }
             }
 
             return false;

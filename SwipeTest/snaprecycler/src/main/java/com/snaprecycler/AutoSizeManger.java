@@ -5,13 +5,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
 
 /**
  * Created by josh.mieczkowski on 12/7/2015.
  */
 class AutoSizeManger extends LinearLayoutManager {
-    private ColumnHandler columnHandler;
+    private AutoSizeColumns autoSizeColumns;
+    private int childSize = Integer.MAX_VALUE;
 
     public AutoSizeManger(Context context) {
         super(context);
@@ -25,30 +25,54 @@ class AutoSizeManger extends LinearLayoutManager {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
-    public void setColumnHandler(ColumnHandler columnHandler) {
-        this.columnHandler = columnHandler;
+    public void setAutoSizeColumns(AutoSizeColumns autoSizeColumns) {
+        this.autoSizeColumns = autoSizeColumns;
     }
 
     @Override
     public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
         super.onLayoutChildren(recycler, state);
-        int widthWithoutPadding = getWidth() - (columnHandler.getVisibleItemCount() * columnHandler.getPaddingLeft()
-                + columnHandler.getVisibleItemCount() * columnHandler.getPaddingRight());
-        int childWidth = widthWithoutPadding / columnHandler.getVisibleItemCount();
-        if(columnHandler.getPercentToShowOfOffViews() > 0f){
-            int offView = (int)(childWidth * columnHandler.getPercentToShowOfOffViews()) / columnHandler.getVisibleItemCount();
-            childWidth -= offView;
+        if (childSize == Integer.MAX_VALUE) {
+            int sizeWithoutPadding = getSizeWithoutPadding();
+            childSize = sizeWithoutPadding / autoSizeColumns.getVisibleItemCount();
+
+            if (autoSizeColumns.getPercentToShowOfOffViews() > 0f) {
+                int offView = (int) (childSize * autoSizeColumns.getPercentToShowOfOffViews()) / autoSizeColumns.getVisibleItemCount();
+                childSize -= offView;
+            }
         }
 
-        for(int index = 0; index < state.getItemCount(); index++){
-            View child = getChildAt(index);
+        if (!state.isPreLayout()) {
+            for (int index = 0; index < getChildCount(); index++) {
+                View child = getChildAt(index);
 
-            if(child != null) {
-                child.getLayoutParams().width = childWidth;
+                if (child != null) {
+                    RecyclerView.LayoutParams layoutParams = (RecyclerView.LayoutParams) child.getLayoutParams();
 
-                ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams)child.getLayoutParams();
-                marginLayoutParams.setMargins(columnHandler.getPaddingLeft(), columnHandler.getPaddingTop(), columnHandler.getPaddingRight(), columnHandler.getPaddingBottom());
+                    if (autoSizeColumns.getOrientation() == AutoSizeColumns.VERTICAL) {
+                        if (layoutParams.height != childSize) {
+                            layoutParams.height = childSize;
+                        }
+                    } else {
+                        if (layoutParams.width != childSize) {
+                            layoutParams.width = childSize;
+                        }
+                    }
+                    layoutParams.setMargins(autoSizeColumns.getPaddingLeft(), autoSizeColumns.getPaddingTop(), autoSizeColumns.getPaddingRight(), autoSizeColumns.getPaddingBottom());
+                }
             }
+        }
+
+
+    }
+
+    private int getSizeWithoutPadding() {
+        if (autoSizeColumns.getOrientation() == AutoSizeColumns.VERTICAL) {
+            return getHeight() - (autoSizeColumns.getVisibleItemCount() * autoSizeColumns.getPaddingTop()
+                    + autoSizeColumns.getVisibleItemCount() * autoSizeColumns.getPaddingBottom());
+        } else {
+            return getWidth() - (autoSizeColumns.getVisibleItemCount() * autoSizeColumns.getPaddingLeft()
+                    + autoSizeColumns.getVisibleItemCount() * autoSizeColumns.getPaddingRight());
         }
     }
 }
