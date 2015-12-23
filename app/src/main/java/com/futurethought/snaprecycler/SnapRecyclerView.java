@@ -1,4 +1,4 @@
-package com.snaprecycler;
+package com.futurethought.snaprecycler;
 
 import android.content.Context;
 import android.graphics.Canvas;

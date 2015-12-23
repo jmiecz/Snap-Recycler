@@ -1,4 +1,4 @@
-package com.snaprecycler;
+package com.futurethought.snaprecycler;
 
 import android.content.Context;
 import android.support.v7.widget.LinearLayoutManager;
@@ -32,7 +32,7 @@ class AutoSizeManger extends LinearLayoutManager {
     @Override
     public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
         super.onLayoutChildren(recycler, state);
-        if(autoSizeColumns == null){
+        if (autoSizeColumns == null) {
             return;
         }
 
