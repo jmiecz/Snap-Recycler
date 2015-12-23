@@ -1,1 +1,2 @@
 include ':app', ':snaprecycler'
+rootProject.name = 'snap-recycler'

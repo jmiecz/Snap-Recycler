@@ -32,6 +32,10 @@ class AutoSizeManger extends LinearLayoutManager {
     @Override
     public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
         super.onLayoutChildren(recycler, state);
+        if(autoSizeColumns == null){
+            return;
+        }
+
         if (childSize == Integer.MAX_VALUE) {
             int sizeWithoutPadding = getSizeWithoutPadding();
             childSize = sizeWithoutPadding / autoSizeColumns.getVisibleItemCount();
@@ -62,7 +66,11 @@ class AutoSizeManger extends LinearLayoutManager {
                 }
             }
         }
+    }
 
+    @Override
+    public void onMeasure(RecyclerView.Recycler recycler, RecyclerView.State state, int widthSpec, int heightSpec) {
+        super.onMeasure(recycler, state, widthSpec, heightSpec);
 
     }
 
@@ -75,4 +83,6 @@ class AutoSizeManger extends LinearLayoutManager {
                     + autoSizeColumns.getVisibleItemCount() * autoSizeColumns.getPaddingRight());
         }
     }
+
+
 }

@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/SwipeTest.iml" filepath="$PROJECT_DIR$/SwipeTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/snap-recycler.iml" filepath="$PROJECT_DIR$/snap-recycler.iml" />
       <module fileurl="file://$PROJECT_DIR$/snaprecycler/snaprecycler.iml" filepath="$PROJECT_DIR$/snaprecycler/snaprecycler.iml" />
     </modules>
   </component>
