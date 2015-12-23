@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Snap-Recycler.iml" filepath="$PROJECT_DIR$/Snap-Recycler.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/snap-recycler/snap-recycler.iml" filepath="$PROJECT_DIR$/snap-recycler/snap-recycler.iml" />
     </modules>
   </component>
 </project>
